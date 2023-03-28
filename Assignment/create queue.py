@@ -1,21 +1,26 @@
 import boto3
+import configparser
 
-# Create an SQS client
-sqs = boto3.client('sqs')
 
-# Set up the queue attributes
-queue_name = 'mahesh'
-queue_attributes = {
-    'DelaySeconds': '0',
-    'VisibilityTimeout': '30'
-}
+def create_queue(KUMAR):
+    sqs = boto3.resource('sqs')
+    queue = sqs.create_queue(QueueName=KUMAR)
+    return queue.url
 
-# Create the queue
-response = sqs.create_queue(
-    QueueName=queue_name,
-    Attributes=queue_attributes
-)
 
-# Print the URL of the newly created queue
-print(f'Queue created: {response["QueueUrl"]}')
+def send_message_to_queue(queue_url, message_body):
+    sqs = boto3.client('sqs')
+    sqs.send_message(QueueUrl=queue_url, MessageBody=message_body)
+
+
+if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    KUMAR = config['queue']['name']
+    queue_url = create_queue(KUMAR)
+
+    message_body = 'Hello, SQS!'
+    send_message_to_queue(queue_url, message_body)
+
 
